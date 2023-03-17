@@ -1,10 +1,12 @@
 ﻿using System;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Mupen64PlusRR.Models.Emulation;
 using Mupen64PlusRR.Models.Interfaces;
 using Mupen64PlusRR.ViewModels.Interfaces;
 
 namespace Mupen64PlusRR.ViewModels;
+
 using LogSources = Mupen64Plus.LogSources;
 using MessageLevel = Mupen64Plus.MessageLevel;
 using EmuState = Mupen64Plus.EmuState;
@@ -12,9 +14,9 @@ using CoreParam = Mupen64Plus.CoreParam;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    [ObservableProperty] private int _windowWidth = 640;
-    [ObservableProperty] private int _windowHeight = 480;
-    [ObservableProperty] private int _menuHeight;
+    [ObservableProperty] private double _windowWidth = 640;
+    [ObservableProperty] private double _windowHeight = 480;
+    [ObservableProperty] private double _menuHeight;
     [ObservableProperty] private bool _resizable = true;
 
     public MainWindowViewModel()
@@ -32,15 +34,18 @@ public partial class MainWindowViewModel : ViewModelBase
         switch (args.Param)
         {
             case CoreParam.EmuState:
-                OpenRomCommand.NotifyCanExecuteChanged();
-                CloseRomCommand.NotifyCanExecuteChanged();
+                Dispatcher.UIThread.Post(() =>
+                {
+                    OpenRomCommand.NotifyCanExecuteChanged();
+                    CloseRomCommand.NotifyCanExecuteChanged();
+                });
                 break;
         }
     }
 
     #region Tracker properties and events
 
-    private EmuState MupenEmuState => (EmuState) Mupen64Plus.CoreStateQuery(Mupen64Plus.CoreParam.EmuState);
+    private EmuState MupenEmuState => (EmuState) Mupen64Plus.CoreStateQuery(CoreParam.EmuState);
 
     public bool MupenIsStopped => MupenEmuState is EmuState.Stopped;
     public bool MupenIsRunning => MupenEmuState is EmuState.Running;
@@ -52,6 +57,7 @@ public partial class MainWindowViewModel : ViewModelBase
     #region Service properties
 
     private IIODialogService? _ioDialogService;
+
     public IIODialogService IODialogService
     {
         set => _ioDialogService ??= value;

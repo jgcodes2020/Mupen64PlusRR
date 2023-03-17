@@ -38,6 +38,16 @@ public unsafe class VidextControl : NativeControlHost, IVidextSurfaceService
 
     public void QuitWindow()
     {
+        if (_sdlGL != null)
+        {
+            // clear the screen to black
+            var gl = GL.GetApi(sym => (IntPtr) SDL.GLGetProcAddress(sym));
+            gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            gl.Clear(ClearBufferMask.ColorBufferBit);
+            SDL.GLSwapWindow(_sdlWin);
+            
+            SDL.GLDeleteContext(_sdlGL);
+        }
         SDL.DestroyWindow(_sdlWin);
         SDL.QuitSubSystem(Sdl.InitVideo);
     }
