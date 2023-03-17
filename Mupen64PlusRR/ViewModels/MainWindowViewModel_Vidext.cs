@@ -29,6 +29,7 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
         try
         {
             VidextSurfaceService.QuitWindow();
+            Resizable = true;
             return Error.Success;
         }
         catch (Exception)
@@ -60,6 +61,7 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
             Mupen64Plus.Log(LogSources.Vidext, MessageLevel.Info, $"Setting video mode {width}x{height}");
             WindowWidth = width;
             WindowHeight = height + MenuHeight;
+            Resizable = false;
 
             VidextSurfaceService.CreateWindow(width, height, bpp);
             return Error.Success;
