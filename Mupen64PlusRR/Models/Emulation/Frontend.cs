@@ -71,10 +71,17 @@ public static partial class Mupen64Plus
     private delegate Error DCoreDetachPlugin(PluginType pluginType);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [RuntimeDllImport]
     private unsafe delegate Error DCoreDoCommand(Command cmd, int paramInt, void* paramPtr);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [RuntimeDllImport]
     private delegate Error DCoreOverrideVidExt(VideoExtensionFunctions? videoFunctionStruct);
+    
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [RuntimeDllImport]
+    private unsafe delegate Error DPluginGetVersion(out PluginType type, out int version, out int apiVersion, out byte* name,
+        out int caps);
 
     #endregion
 
@@ -86,10 +93,6 @@ public static partial class Mupen64Plus
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate Error DPluginShutdown();
 
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private unsafe delegate Error DPluginGetVersion(out PluginType type, out int version, out int apiVersion, out byte* name,
-        out int caps);
-    
 #pragma warning disable CS8618
     private static Dictionary<PluginType, IntPtr> _pluginDict;
     
@@ -99,6 +102,7 @@ public static partial class Mupen64Plus
     private static void ResolveFrontendFunctions()
     {
         ResolveDelegate(_libHandle, out _fnCoreErrorMessage);
+        ResolveDelegate(_libHandle, out _fnCorePluginGetVersion);
         ResolveDelegate(_libHandle, out _fnCoreStartup);
         ResolveDelegate(_libHandle, out _fnCoreShutdown);
         ResolveDelegate(_libHandle, out _fnCoreAttachPlugin);
@@ -111,6 +115,7 @@ public static partial class Mupen64Plus
     // ========================================================
     
     private static DCoreErrorMessage _fnCoreErrorMessage;
+    private static DPluginGetVersion _fnCorePluginGetVersion;
     private static DCoreStartup _fnCoreStartup;
     private static DCoreShutdown _fnCoreShutdown;
     private static DCoreAttachPlugin _fnCoreAttachPlugin;

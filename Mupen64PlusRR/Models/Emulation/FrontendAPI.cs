@@ -20,7 +20,7 @@ public static partial class Mupen64Plus
         ResolveFrontendFunctions();
         ResolveConfigFunctions();
 
-        _debugCallback = LogDebug;
+        _debugCallback = OnLogMessage;
         _stateCallback = OnStateChange;
 
         Error err = _fnCoreStartup(
@@ -73,19 +73,19 @@ public static partial class Mupen64Plus
         throw (Exception) Activator.CreateInstance(errType, $"M64+ {_fnCoreErrorMessage(err)}")!;
     }
 
-    private static void LogDebug(IntPtr context, MessageLevel level, string message)
+    private static void OnLogMessage(IntPtr context, MessageLevel level, string message)
     {
         var type = (int) context;
 
         string typeString = type switch
         {
-            (int) PluginType.Core => "",
+            (int) PluginType.Core => "CORE  ",
             (int) PluginType.Graphics => "VIDEO ",
             (int) PluginType.Audio => "AUDIO ",
             (int) PluginType.Input => "INPUT ",
             (int) PluginType.RSP => "RSP   ",
-            0x4201 => "VIDXT ",
-            0x4202 => "APP   ",
+            (int) LogSources.App => "APP   ",
+            (int) LogSources.Vidext => "VIDXT ",
             _ => "??    "
         };
 
@@ -426,7 +426,7 @@ public static partial class Mupen64Plus
 
 
         var startup = NativeLibHelper.GetFunction<DPluginStartup>(pluginLib, "PluginStartup");
-        err = startup(_libHandle, (IntPtr) (int) type, LogDebug);
+        err = startup(_libHandle, (IntPtr) (int) type, OnLogMessage);
         ThrowForError(err);
 
         err = _fnCoreAttachPlugin(type, pluginLib);
@@ -452,8 +452,45 @@ public static partial class Mupen64Plus
         NativeLibrary.Free(pluginLib);
     }
 
+    public struct CoreVersion
+    {
+        public uint Version;
+        public uint APIVersion;
+        public string Name;
+        public uint VersionMajor => (Version >> 16) & 0xFF;
+        public uint VersionMinor => (Version >> 8) & 0xFF;
+        public uint VersionPatch => (Version >> 0) & 0xFF;
+    }
+
+    public static unsafe CoreVersion GetVersionInfo()
+    {
+        Error err = _fnCorePluginGetVersion(out _, out var version, out var apiVersion, out var name, out _);
+        ThrowForError(err);
+
+        return new CoreVersion
+        {
+            Version = (uint) version,
+            APIVersion = (uint) apiVersion,
+            Name = Marshal.PtrToStringAnsi((IntPtr) name) ?? ""
+        };
+    }
+
     #endregion
 
+    #region Logging
+
+    public enum LogSources
+    {
+        App = 0x4201,
+        Vidext,
+    }
+
+    public static void Log(LogSources source, MessageLevel level, string message, params object[] args)
+    {
+        OnLogMessage((IntPtr) source, level, string.Format(message, args));
+    }
+
+    #endregion
 
     // Utilities
     // =================================
