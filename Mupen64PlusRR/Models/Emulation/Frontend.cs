@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using M64RPFW.Models.Helpers;
-using static M64RPFW.Models.Helpers.NativeLibHelper;
+using Mupen64PlusRR.Models.Helpers;
+using static Mupen64PlusRR.Models.Helpers.NativeLibHelper;
 using IntPtr = System.IntPtr;
 
 namespace Mupen64PlusRR.Models.Emulation;
@@ -71,43 +71,10 @@ public static partial class Mupen64Plus
     private delegate Error DCoreDetachPlugin(PluginType pluginType);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [RuntimeDllImport]
     private unsafe delegate Error DCoreDoCommand(Command cmd, int paramInt, void* paramPtr);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    [RuntimeDllImport]
-    private delegate Error DCoreOverrideVidExt(VideoExtensionFunctions videoFunctionStruct);
-
-    #endregion
-
-    #region Video Extensions
-
-    // Video extension handling
-    // ========================================================
-
-    public interface IVideoExtension
-    {
-        Error Init();
-        Error Quit();
-        (Error err, Size2D[]? modes) ListFullscreenModes(int maxLen);
-        (Error err, int[]? rates) ListFullscreenRates(Size2D size, int maxLen);
-        Error SetVideoMode(int width, int height, int bitsPerPixel, VideoMode mode, VideoFlags flags);
-
-        Error SetVideoModeWithRate(int width, int height, int refreshRate, int bitsPerPixel, VideoMode mode,
-            VideoFlags flags);
-
-        Error ResizeWindow(Size2D size);
-        Error SetCaption(string title);
-        Error ToggleFullScreen();
-
-        IntPtr GLGetProcAddress(string symbol);
-        Error SetAttribute(GLAttribute attr, int value);
-        Error GetAttribute(GLAttribute attr, ref int value);
-        Error SwapBuffers();
-        uint GetDefaultFramebuffer();
-    }
-
-    private static VideoExtensionFunctions? _vidextFunctions;
+    private delegate Error DCoreOverrideVidExt(VideoExtensionFunctions? videoFunctionStruct);
 
     #endregion
 

@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using M64RPFW.Models.Helpers;
+using Mupen64PlusRR.Models.Helpers;
 
 namespace Mupen64PlusRR.Models.Emulation;
 

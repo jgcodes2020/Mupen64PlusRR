@@ -8,7 +8,9 @@
         x:Class="Mupen64PlusRR.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="Mupen64PlusRR"
-        Width="640" Height="480">
+        Width="{Binding WindowWidth,Mode=TwoWay}" 
+        Height="{Binding WindowHeight,Mode=TwoWay}"
+        CanResize="{Binding Resizable,Mode=OneWay}">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -18,8 +20,7 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open ROM" />
-                <MenuItem Header="_Open ROM" />
-                
+                <MenuItem Header="_Close ROM" />
             </MenuItem>
             <MenuItem Header="Movie">
                 <MenuItem Header="_Load Movie" />

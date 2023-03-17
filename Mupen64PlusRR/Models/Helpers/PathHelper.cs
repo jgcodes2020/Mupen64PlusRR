@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace M64RPFW.Models.Helpers;
+namespace Mupen64PlusRR.Models.Helpers;
 
 public static class PathHelper
 {

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace M64RPFW.Models.Helpers;
+namespace Mupen64PlusRR.Models.Helpers;
 
 /// <summary>
 /// Marks a pseudo-<see cref="DllImportAttribute"/>ed function resolved at runtime.

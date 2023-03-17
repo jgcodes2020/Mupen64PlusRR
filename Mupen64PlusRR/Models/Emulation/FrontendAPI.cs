@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using M64RPFW.Models.Helpers;
 using Mupen64PlusRR.Models.Helpers;
 
 namespace Mupen64PlusRR.Models.Emulation;
@@ -375,28 +374,15 @@ public static partial class Mupen64Plus
     #endregion
 
     #region Miscellaneous core functions
-
+    
     /// <summary>
-    /// Overrides the core's video extension API.
+    /// Overrides the core "video extension" functions to a custom hook.
     /// </summary>
-    /// <param name="obj">An object implementing the Video Extension API.</param>
-    public static void OverrideVideoExtension(IVideoExtension obj)
+    /// <param name="vidext"></param>
+    public static void OverrideVidExt(VideoExtensionFunctions? vidext)
     {
-        ArgumentNullException.ThrowIfNull(obj);
-
-        _vidextFunctions = new VideoExtensionFunctions(obj);
-
-        Error err = _fnCoreOverrideVidExt(_vidextFunctions);
+        Error err = _fnCoreOverrideVidExt(vidext);
         ThrowForError(err);
-    }
-
-    /// <summary>
-    /// Clears any active override on the core's video extension API.
-    /// </summary>
-    public static void RemoveVideoExtension()
-    {
-        _vidextFunctions = null;
-        _fnCoreOverrideVidExt(VideoExtensionFunctions.Empty);
     }
 
     /// <summary>

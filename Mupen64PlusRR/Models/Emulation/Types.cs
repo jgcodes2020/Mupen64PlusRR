@@ -230,156 +230,25 @@ public static partial class Mupen64Plus
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public class VideoExtensionFunctions
+    public unsafe class VideoExtensionFunctions
     {
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_Init();
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_Quit();
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public unsafe delegate Error DVidExt_ListFullscreenModes(IntPtr sizes, int* len);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public unsafe delegate Error DVidExt_ListFullscreenRates(Size2D size, int* output, int* len);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_SetVideoMode(int width, int height, int bitsPerPixel, VideoMode mode,
-            VideoFlags flags);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_SetVideoModeWithRate(int width, int height, int refreshRate, int bitsPerPixel,
-            VideoMode mode,
-            VideoFlags flags);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_ResizeWindow(Size2D size);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_SetCaption(string title);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_ToggleFullScreen();
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate IntPtr DVidExt_GLGetProcAddress(string symbol);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_SetAttribute(GLAttribute attr, int value);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_GetAttribute(GLAttribute attr, ref int value);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error DVidExt_SwapBuffers();
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate uint DVidExt_GetDefaultFramebuffer();
-
         public uint Functions;
-        
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_Init? VidExtFuncInit;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_Quit? VidExtFuncQuit;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_ListFullscreenModes? VidExtFuncListModes;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_ListFullscreenRates? VidExtFuncListRates;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_SetVideoMode? VidExtFuncSetMode;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_SetVideoModeWithRate? VidExtFuncSetModeWithRate;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_GLGetProcAddress? VidExtFuncGLGetProc;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_SetAttribute? VidExtFuncGLSetAttr;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_GetAttribute? VidExtFuncGLGetAttr;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_SwapBuffers? VidExtFuncGLSwapBuf;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_SetCaption? VidExtFuncSetCaption;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_ToggleFullScreen? VidExtFuncToggleFS;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_ResizeWindow? VidExtFuncResizeWindow;
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public DVidExt_GetDefaultFramebuffer? VidExtFuncGLGetDefaultFramebuffer;
-        public static VideoExtensionFunctions Empty =>
-            new()
-            {
-                Functions = 14,
-                VidExtFuncInit = null,
-                VidExtFuncQuit = null,
-                VidExtFuncListModes = null,
-                VidExtFuncListRates = null,
-                VidExtFuncSetMode = null,
-                VidExtFuncSetModeWithRate = null,
-                VidExtFuncResizeWindow = null,
-                VidExtFuncSetCaption = null,
-                VidExtFuncToggleFS = null,
-                VidExtFuncGLGetProc = null,
-                VidExtFuncGLSetAttr = null,
-                VidExtFuncGLGetAttr = null,
-                VidExtFuncGLSwapBuf = null,
-                VidExtFuncGLGetDefaultFramebuffer = null
-            };
-
-        public VideoExtensionFunctions() {}
-        
-        public unsafe VideoExtensionFunctions(IVideoExtension obj)
-        {
-            Functions = 14;
-            VidExtFuncInit = obj.Init;
-            VidExtFuncQuit = obj.Quit;
-            VidExtFuncListModes = delegate(IntPtr sizes, int* len)
-            {
-                (Error err, Size2D[]? modes) = obj.ListFullscreenModes(*len);
-                if (err != Error.Success)
-                    return err;
-                if (modes == null || modes.Length > *len)
-                    return Error.Internal;
-
-                // Marshal returned array to native
-                *len = modes.Length;
-                foreach (Size2D mode in modes)
-                {
-                    Marshal.StructureToPtr(mode, sizes, false);
-                    sizes += Marshal.SizeOf<Size2D>();
-                }
-
-                return Error.Success;
-            };
-            VidExtFuncListRates = delegate(Size2D size, int* output, int* len)
-            {
-                (Error err, int[]? rates) = obj.ListFullscreenRates(size, *len);
-                if (err != Error.Success)
-                    return err;
-                if (rates == null || rates.Length > *len)
-                    return Error.Internal;
-
-                // Copy returned array to native
-                *len = rates.Length;
-                foreach (int rate in rates)
-                    *output++ = rate;
-
-                return Error.Success;
-            };
-            VidExtFuncSetMode = obj.SetVideoMode;
-            VidExtFuncSetModeWithRate = obj.SetVideoModeWithRate;
-            VidExtFuncGLGetProc = obj.GLGetProcAddress;
-            VidExtFuncGLSetAttr = obj.SetAttribute;
-            VidExtFuncGLGetAttr = obj.GetAttribute;
-            VidExtFuncGLSwapBuf = obj.SwapBuffers;
-            VidExtFuncSetCaption = obj.SetCaption;
-            VidExtFuncToggleFS = obj.ToggleFullScreen;
-            VidExtFuncResizeWindow = obj.ResizeWindow;
-            VidExtFuncGLGetDefaultFramebuffer = obj.GetDefaultFramebuffer;
-        }
+        public delegate*<Error> VidExtFuncInit;
+        public delegate*<Error> VidExtFuncQuit;
+        public delegate*<Error, Span<Size2D>, Span<int>> VidExtFuncListModes;
+        public delegate*<Error, Size2D, Span<int>, Span<int>> VidExtFuncListRates;
+        public delegate*<Error, int, int, int, int, int> VidExtFuncSetMode;
+        public delegate*<Error, int, int, int, int, int, int> VidExtFuncSetModeWithRate;
+        public delegate*<IntPtr, string> VidExtFuncGLGetProc;
+        public delegate*<Error, GLAttribute, int> VidExtFuncGLSetAttr;
+        public delegate*<Error, GLAttribute, Span<int>> VidExtFuncGLGetAttr;
+        public delegate*<Error> VidExtFuncGLSwapBuf;
+        public delegate*<Error, string> VidExtFuncSetCaption;
+        public delegate*<Error> VidExtFuncToggleFS;
+        public delegate*<Error, int, int> VidExtFuncResizeWindow;
+        public delegate*<uint> VidExtFuncGLGetDefaultFramebuffer;
     }
-
+    
     // Custom
 
     public enum PlayModes : int

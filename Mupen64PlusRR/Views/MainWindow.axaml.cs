@@ -8,5 +8,6 @@ namespace Mupen64PlusRR.Views
         {
             InitializeComponent();
         }
+        
     }
 }
