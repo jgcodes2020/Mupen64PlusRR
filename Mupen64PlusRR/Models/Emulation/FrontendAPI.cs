@@ -9,6 +9,13 @@ namespace Mupen64PlusRR.Models.Emulation;
 
 public static partial class Mupen64Plus
 {
+    
+    private static readonly DebugCallback _debugCallback;
+    private static readonly StateCallback _stateCallback;
+    private static readonly FrameCallback _frameCallback;
+
+    private static readonly GCHandle[] _callbackGcHandles;
+    
     // Public API
     // ========================================================
 #pragma warning disable CS8618, CS8602
@@ -34,11 +41,21 @@ public static partial class Mupen64Plus
             Marshal.GetFunctionPointerForDelegate(_frameCallback).ToPointer());
         ThrowForError(err);
 
+        // _callbackGcHandles = new[]
+        // {
+        //     GCHandle.Alloc(_debugCallback, GCHandleType.Normal),
+        //     GCHandle.Alloc(_stateCallback, GCHandleType.Normal),
+        //     GCHandle.Alloc(_frameCallback, GCHandleType.Normal),
+        // };
+
         _pluginDict = new();
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) =>
         {
             ConfigSaveFile();
+            
+            // foreach (var handle in _callbackGcHandles)
+            //     handle.Free();
 
             // ReSharper disable once VariableHidesOuterVariable
             Error err = _fnCoreShutdown!();
@@ -376,20 +393,18 @@ public static partial class Mupen64Plus
     #region Miscellaneous core functions
     
     /// <summary>
-    /// Overrides the core "video extension" functions to a custom hook.
+    /// Overrides the core "video extension" functions. These handle window
+    /// management for the video plugin.
     /// </summary>
-    /// <param name="vidext"></param>
-    public static void OverrideVidExt(VideoExtensionFunctions vidext)
+    /// <param name="vidext">The video extension functions to use, or null to remove it.</param>
+    public static void OverrideVidExt(VideoExtensionFunctions? vidext)
     {
-        Error err = _fnCoreOverrideVidExt(vidext);
+        _currentVidext = vidext;
+        Error err = _fnCoreOverrideVidExt(vidext ?? VideoExtensionFunctions.Empty);
         ThrowForError(err);
     }
 
-    public static void ClearVidExt(VideoExtensionFunctions vidext)
-    {
-        Error err = _fnCoreOverrideVidExt(VideoExtensionFunctions.Empty);
-        ThrowForError(err);
-    }
+    private static VideoExtensionFunctions? _currentVidext;
 
     /// <summary>
     /// Attaches a plugin to the core.

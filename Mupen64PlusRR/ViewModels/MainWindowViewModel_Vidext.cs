@@ -54,9 +54,10 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
         // FUTURE: support fullscreen and resizing
         try
         {
-            if (mode != Mupen64Plus.VideoMode.Windowed || flags != 0)
+            if (mode != Mupen64Plus.VideoMode.Windowed)
                 return Error.Unsupported;
-
+            
+            Mupen64Plus.Log(LogSources.Vidext, MessageLevel.Info, $"Setting video mode {width}x{height}");
             WindowWidth = width;
             WindowHeight = height + MenuHeight;
 
