@@ -76,7 +76,7 @@ public static partial class Mupen64Plus
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     [RuntimeDllImport]
-    private delegate Error DCoreOverrideVidExt(VideoExtensionFunctions? videoFunctionStruct);
+    private delegate Error DCoreOverrideVidExt(VideoExtensionFunctions videoFunctionStruct);
     
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     [RuntimeDllImport]

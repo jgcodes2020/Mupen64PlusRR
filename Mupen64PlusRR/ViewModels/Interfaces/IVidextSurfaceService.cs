@@ -1,9 +1,13 @@
+using System;
 using Mupen64PlusRR.Controls.Helpers;
 using Mupen64PlusRR.Models.Emulation;
 
 namespace Mupen64PlusRR.ViewModels.Interfaces;
 
-public interface IVidextWindow
+/// <summary>
+/// Represents view-specific portions of a video extension implementation.
+/// </summary>
+public interface IVidextSurfaceService
 {
     void InitWindow();
     void QuitWindow();
@@ -17,5 +21,6 @@ public interface IVidextWindow
     void MakeCurrent();
     void SwapBuffers();
 
+    IntPtr GetProcAddress(IntPtr strSymbol);
     int GetDefaultFramebuffer();
 }

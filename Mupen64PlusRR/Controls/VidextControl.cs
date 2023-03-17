@@ -16,7 +16,7 @@ using SDL_Window = Silk.NET.SDL.Window;
 
 namespace Mupen64PlusRR.Controls;
 
-public unsafe class VidextControl : NativeControlHost, IVidextWindow
+public unsafe class VidextControl : NativeControlHost, IVidextSurfaceService
 {
     public VidextControl()
     {
@@ -87,6 +87,11 @@ public unsafe class VidextControl : NativeControlHost, IVidextWindow
             return;
         
         SDL.GLSwapWindow(_sdlWin);
+    }
+
+    public IntPtr GetProcAddress(IntPtr strSymbol)
+    {
+        return (IntPtr) SDL.GLGetProcAddress((byte*) strSymbol);
     }
 
     public int GetDefaultFramebuffer()

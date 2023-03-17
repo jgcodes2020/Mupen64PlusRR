@@ -379,9 +379,15 @@ public static partial class Mupen64Plus
     /// Overrides the core "video extension" functions to a custom hook.
     /// </summary>
     /// <param name="vidext"></param>
-    public static void OverrideVidExt(VideoExtensionFunctions? vidext)
+    public static void OverrideVidExt(VideoExtensionFunctions vidext)
     {
         Error err = _fnCoreOverrideVidExt(vidext);
+        ThrowForError(err);
+    }
+
+    public static void ClearVidExt(VideoExtensionFunctions vidext)
+    {
+        Error err = _fnCoreOverrideVidExt(VideoExtensionFunctions.Empty);
         ThrowForError(err);
     }
 
