@@ -19,8 +19,9 @@
     <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open ROM" />
-                <MenuItem Header="_Close ROM" />
+                <!-- Opening a ROM depends on the window, thus it's part of view -->
+                <MenuItem Header="_Open ROM" Command="{Binding OpenRomCommand}"/>
+                <MenuItem Header="_Close ROM" Command="{Binding CloseRomCommand}"/>
             </MenuItem>
             <MenuItem Header="Movie">
                 <MenuItem Header="_Load Movie" />

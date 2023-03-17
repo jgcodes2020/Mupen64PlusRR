@@ -14,7 +14,7 @@ public static partial class Mupen64Plus
 #pragma warning disable CS8618, CS8602
     static unsafe Mupen64Plus()
     {
-        string expectedPath = GetExpectedLibPath();
+        string expectedPath = GetBundledLibraryPath();
         _libHandle = NativeLibrary.Load(Path.Join(expectedPath, NativeLibHelper.AsDLL("mupen64plus")));
 
         ResolveFrontendFunctions();
@@ -494,14 +494,12 @@ public static partial class Mupen64Plus
 
     // Utilities
     // =================================
-    private static string GetExpectedLibPath()
+    public static string GetBundledLibraryPath()
     {
         string path = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location) ??
                       throw new ApplicationException("Could not retrieve .exe path");
 
         return Path.Join(new[] { path, "Libraries" });
-
-        //return "/usr/lib/libmupen64plus.so";
     }
 
     private static IntPtr _libHandle;
