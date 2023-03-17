@@ -3,10 +3,12 @@
         xmlns:vm="using:Mupen64PlusRR.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ctls="using:Mupen64PlusRR.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Mupen64PlusRR.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Mupen64PlusRR">
+        Title="Mupen64PlusRR"
+        Width="640" Height="480">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -15,14 +17,15 @@
     <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open ROM"></MenuItem>
+                <MenuItem Header="_Open ROM" />
+                <MenuItem Header="_Open ROM" />
+                
             </MenuItem>
             <MenuItem Header="Movie">
-                <MenuItem Header="_Load Movie"></MenuItem>
+                <MenuItem Header="_Load Movie" />
             </MenuItem>
         </Menu>
-        <Rectangle VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-        <!-- MAIN VIEW GOES HERE -->
+        <ctls:VidextControl />
     </DockPanel>
-
+    
 </Window>

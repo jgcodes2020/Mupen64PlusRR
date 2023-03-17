@@ -11,6 +11,7 @@ namespace Mupen64PlusRR
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+            
         }
 
         public override void OnFrameworkInitializationCompleted()
