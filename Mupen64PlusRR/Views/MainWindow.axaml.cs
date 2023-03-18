@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
@@ -7,9 +8,10 @@ using Avalonia.Controls;
 using Avalonia.Dialogs;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Mupen64PlusRR.Controls;
 using Mupen64PlusRR.ViewModels;
-using Mupen64PlusRR.ViewModels.Interfaces;
+using Mupen64PlusRR.ViewModels.Services;
 
 namespace Mupen64PlusRR.Views;
 
@@ -30,29 +32,38 @@ public partial class MainWindow : Window, ISystemDialogService, IViewDialogServi
         // Dependency injection for view model
         var vm = (DataContext as MainWindowViewModel)!;
         vm.SystemDialogService = this;
-        vm.VidextSurfaceService = this.Find<VidextControl>("EmulatorWindow");
+        vm.VidextSurfaceService = this.Find<VidextControl>("EmulatorWindow")!;
         vm.ViewDialogService = this;
     }
 
-    public Task<string[]?> ShowOpenDialog(string title, List<FileDialogFilter> filters, bool allowMulti)
+    private static FilePickerFileType ToFilePickerType(FileFilter filter)
     {
-        OpenFileDialog ofd = new()
+        return new FilePickerFileType(filter.Name)
         {
-            Title = title,
-            Filters = filters,
-            AllowMultiple = allowMulti
+            Patterns = filter.Patterns,
+            AppleUniformTypeIdentifiers = filter.AppleTypeIds
         };
-        return ofd.ShowAsync(this);
     }
 
-    public Task<string?> ShowSaveDialog(string title, List<FileDialogFilter> filters)
+    public async Task<string[]?> ShowOpenDialog(string title, List<FileFilter> filters, bool allowMulti = true)
     {
-        SaveFileDialog sfd = new()
+        var storagePaths = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
-            Filters = filters
-        };
-        return sfd.ShowAsync(this);
+            AllowMultiple = allowMulti,
+            FileTypeFilter = filters.Select(ToFilePickerType).ToArray()
+        });
+        return storagePaths.Count == 0? null : storagePaths.Select(path => path.Path.LocalPath).ToArray();
+    }
+
+    public async Task<string?> ShowSaveDialog(string title, List<FileFilter> filters)
+    {
+        var storagePath = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = title,
+            FileTypeChoices = filters.Select(ToFilePickerType).ToArray()
+        });
+        return storagePath?.Path.LocalPath;
     }
 
     public Task ShowSettingsDialog()

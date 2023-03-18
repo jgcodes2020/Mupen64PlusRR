@@ -3,7 +3,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Mupen64PlusRR.Models.Emulation;
 using Mupen64PlusRR.Models.Interfaces;
-using Mupen64PlusRR.ViewModels.Interfaces;
+using Mupen64PlusRR.ViewModels.Services;
 
 namespace Mupen64PlusRR.ViewModels;
 

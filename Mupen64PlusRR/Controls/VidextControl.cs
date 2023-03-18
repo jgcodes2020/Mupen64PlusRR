@@ -7,7 +7,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Mupen64PlusRR.Controls.Helpers;
 using Mupen64PlusRR.Models.Emulation;
-using Mupen64PlusRR.ViewModels.Interfaces;
+using Mupen64PlusRR.ViewModels.Services;
 using Silk.NET.OpenGL;
 using Silk.NET.SDL;
 using static Mupen64PlusRR.Controls.Helpers.SilkGlobals;

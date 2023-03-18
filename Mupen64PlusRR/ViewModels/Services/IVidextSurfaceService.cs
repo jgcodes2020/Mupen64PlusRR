@@ -2,7 +2,7 @@ using System;
 using Mupen64PlusRR.Controls.Helpers;
 using Mupen64PlusRR.Models.Emulation;
 
-namespace Mupen64PlusRR.ViewModels.Interfaces;
+namespace Mupen64PlusRR.ViewModels.Services;
 
 /// <summary>
 /// Represents view-specific portions of a video extension implementation.
