@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -14,7 +15,7 @@ public static partial class Mupen64Plus
     private static readonly StateCallback _stateCallback;
     private static readonly FrameCallback _frameCallback;
 
-    private static readonly GCHandle[] _callbackGcHandles;
+    private static GCHandle[] _callbackGCHandles;
     
     // Public API
     // ========================================================
@@ -41,21 +42,21 @@ public static partial class Mupen64Plus
             Marshal.GetFunctionPointerForDelegate(_frameCallback).ToPointer());
         ThrowForError(err);
 
-        // _callbackGcHandles = new[]
-        // {
-        //     GCHandle.Alloc(_debugCallback, GCHandleType.Normal),
-        //     GCHandle.Alloc(_stateCallback, GCHandleType.Normal),
-        //     GCHandle.Alloc(_frameCallback, GCHandleType.Normal),
-        // };
+        _callbackGCHandles = new[]
+        {
+            GCHandle.Alloc(_debugCallback, GCHandleType.Normal),
+            GCHandle.Alloc(_stateCallback, GCHandleType.Normal),
+            GCHandle.Alloc(_frameCallback, GCHandleType.Normal),
+        };
 
-        _pluginDict = new();
+        _pluginDict = new Dictionary<PluginType, IntPtr>();
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) =>
         {
-            ConfigSaveFile();
+            foreach (var handle in _callbackGCHandles)
+                handle.Free();
             
-            // foreach (var handle in _callbackGcHandles)
-            //     handle.Free();
+            ConfigSaveFile();
 
             // ReSharper disable once VariableHidesOuterVariable
             Error err = _fnCoreShutdown!();
@@ -281,6 +282,11 @@ public static partial class Mupen64Plus
     {
         Error err = _fnCoreDoCommand(Command.CoreStateSet, (int) param, &value);
         ThrowForError(err);
+    }
+
+    public static unsafe void CoreStateSet(CoreParam param, uint value)
+    {
+        CoreStateSet(param, (int) value);
     }
 
     /// <summary>

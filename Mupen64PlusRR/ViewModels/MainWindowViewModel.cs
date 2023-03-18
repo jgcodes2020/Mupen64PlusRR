@@ -24,7 +24,8 @@ public partial class MainWindowViewModel : ViewModelBase
         var version = Mupen64Plus.GetVersionInfo();
         Mupen64Plus.Log(LogSources.App, MessageLevel.Info,
             $"Loaded M64+ v{version.VersionMajor}.{version.VersionMinor}.{version.VersionPatch}");
-
+        
+        // Register Mupen64Plus-related listeners
         Mupen64Plus.StateChanged += OnMupenStateChange;
         Mupen64Plus.OverrideVidExt(this.ToVidextStruct());
     }
@@ -43,6 +44,18 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    partial void OnSizeChanged();
+
+    partial void OnWindowWidthChanged(double value)
+    {
+        OnSizeChanged();
+    }
+
+    partial void OnWindowHeightChanged(double value)
+    {
+        OnSizeChanged();
+    }
+
     #region Tracker properties and events
 
     private EmuState MupenEmuState => (EmuState) Mupen64Plus.CoreStateQuery(CoreParam.EmuState);
@@ -56,12 +69,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     #region Service properties
 
-    private IIODialogService? _ioDialogService;
+    private ISystemDialogService? _systemDialogService;
 
-    public IIODialogService IODialogService
+    public ISystemDialogService SystemDialogService
     {
-        set => _ioDialogService ??= value;
-        private get => _ioDialogService ?? throw new NullReferenceException("No registered IIODialogService");
+        set => _systemDialogService ??= value;
+        private get => _systemDialogService ?? throw new NullReferenceException("No registered IIODialogService");
     }
 
     private IVidextSurfaceService? _vidextSurfaceService;
@@ -70,6 +83,14 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         set => _vidextSurfaceService ??= value;
         private get => _vidextSurfaceService ?? throw new NullReferenceException("No registered IVidextSurfaceService");
+    }
+
+    private IViewDialogService? _viewDialogService;
+
+    public IViewDialogService ViewDialogService
+    {
+        set => _viewDialogService ??= value;
+        private get => _viewDialogService ?? throw new NullReferenceException("No registered IViewDialogService");
     }
 
     #endregion

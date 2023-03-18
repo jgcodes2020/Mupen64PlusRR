@@ -20,16 +20,30 @@ public unsafe class VidextControl : NativeControlHost, IVidextSurfaceService
 {
     public VidextControl()
     {
-        _mutex = new Mutex();
     }
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
     {
         var platHandle = base.CreateNativeControlCore(parent);
         _winHandle = platHandle.Handle;
+        
+        // HACK: make the window black and clear it
+        {
+            InitWindow();
+            CreateWindow((int) Width, (int) Height, 32);
+            
+            SDL.GLMakeCurrent(_sdlWin, _sdlGL);
+            var gl = GL.GetApi(sym => (IntPtr) SDL.GLGetProcAddress(sym));
+            gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            gl.Clear(ClearBufferMask.ColorBufferBit);
+            SDL.GLSwapWindow(_sdlWin);
+        }
+        
         return platHandle;
     }
     public void InitWindow()
     {
+        if (_sdlWin != null)
+            return;
         SDL.InitSubSystem(Sdl.InitVideo);
         // needed to let SDL handle OpenGL context management
         SDL.SetHint("SDL_VIDEO_FOREIGN_WINDOW_OPENGL", "1");
@@ -38,6 +52,8 @@ public unsafe class VidextControl : NativeControlHost, IVidextSurfaceService
 
     public void QuitWindow()
     {
+        if (_sdlWin == null)
+            return;
         if (_sdlGL != null)
         {
             // clear the screen to black
@@ -112,5 +128,4 @@ public unsafe class VidextControl : NativeControlHost, IVidextSurfaceService
     private IntPtr _winHandle;
     private SDL_Window* _sdlWin;
     private void* _sdlGL;
-    private Mutex _mutex;
 }

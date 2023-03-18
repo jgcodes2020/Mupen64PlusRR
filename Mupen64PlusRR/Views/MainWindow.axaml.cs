@@ -6,18 +6,21 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Dialogs;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
 using Mupen64PlusRR.Controls;
 using Mupen64PlusRR.ViewModels;
 using Mupen64PlusRR.ViewModels.Interfaces;
 
 namespace Mupen64PlusRR.Views;
 
-public partial class MainWindow : Window, IIODialogService
+public partial class MainWindow : Window, ISystemDialogService, IViewDialogService
 {
     public MainWindow()
     {
-        InitializeComponent();
+        AvaloniaXamlLoader.Load(this);
     }
+
+    private MainWindowViewModel ViewModel => (MainWindowViewModel) DataContext!;
 
     protected override void OnDataContextChanged(EventArgs e)
     {
@@ -26,8 +29,9 @@ public partial class MainWindow : Window, IIODialogService
             return;
         // Dependency injection for view model
         var vm = (DataContext as MainWindowViewModel)!;
-        vm.IODialogService = this;
+        vm.SystemDialogService = this;
         vm.VidextSurfaceService = this.Find<VidextControl>("EmulatorWindow");
+        vm.ViewDialogService = this;
     }
 
     public Task<string[]?> ShowOpenDialog(string title, List<FileDialogFilter> filters, bool allowMulti)
@@ -49,5 +53,11 @@ public partial class MainWindow : Window, IIODialogService
             Filters = filters
         };
         return sfd.ShowAsync(this);
+    }
+
+    public Task ShowSettingsDialog()
+    {
+        var dialog = new SettingsDialog();
+        return dialog.ShowDialog(this);
     }
 }

@@ -11,6 +11,8 @@ using MessageLevel = Mupen64Plus.MessageLevel;
 using Error = Mupen64Plus.Error;
 public unsafe partial class MainWindowViewModel : IVideoExtensionService
 {
+    #region Video Extension Functions
+
     public Error VidextInit()
     {
         try
@@ -52,7 +54,7 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
 
     public Error VidextSetVideoMode(int width, int height, int bpp, Mupen64Plus.VideoMode mode, Mupen64Plus.VideoFlags flags)
     {
-        // FUTURE: support fullscreen and resizing
+        // FUTURE: support fullscreen
         try
         {
             if (mode != Mupen64Plus.VideoMode.Windowed)
@@ -61,7 +63,8 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
             Mupen64Plus.Log(LogSources.Vidext, MessageLevel.Info, $"Setting video mode {width}x{height}");
             WindowWidth = width;
             WindowHeight = height + MenuHeight;
-            Resizable = false;
+            if ((flags & Mupen64Plus.VideoFlags.SupportResizing) == 0)
+                Resizable = false;
 
             VidextSurfaceService.CreateWindow(width, height, bpp);
             return Error.Success;
@@ -111,8 +114,15 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
 
     public Error VidextResizeWindow(int width, int height)
     {
-        // FUTURE: support resizing/fullscreen
-        return Error.Unsupported;
+        try
+        {
+            VidextSurfaceService.ResizeWindow(width, height);
+            return Error.Success;
+        }
+        catch (Exception)
+        {
+            return Error.Internal;
+        }
     }
 
     public Error VidextSetCaption(string str)
@@ -143,5 +153,16 @@ public unsafe partial class MainWindowViewModel : IVideoExtensionService
     public uint VidextGLGetDefaultFramebuffer()
     {
         return 0;
+    }
+
+    #endregion
+
+    partial void OnSizeChanged()
+    {
+        if (!MupenIsActive)
+            return;
+        uint width = Math.Min((uint) WindowWidth, 65535);
+        uint height = Math.Min((uint) WindowHeight, 65535);
+        Mupen64Plus.CoreStateSet(Mupen64Plus.CoreParam.VideoSize, (width << 16) | height);
     }
 }

@@ -38,11 +38,13 @@ public partial class MainWindowViewModel
     private Thread? _emuThread;
 
     #endregion
-    
+
+    #region Emulator commands
+
     [RelayCommand(CanExecute = nameof(MupenIsStopped))]
     private async void OpenRom()
     {
-        var paths = await IODialogService.ShowOpenDialog("Choose a ROM...", new List<FileDialogFilter>
+        var paths = await SystemDialogService.ShowOpenDialog("Choose a ROM...", new List<FileDialogFilter>
         {
             new()
             {
@@ -84,4 +86,16 @@ public partial class MainWindowViewModel
     {
         Mupen64Plus.AdvanceFrame();
     }
+
+    #endregion
+
+    #region View commands
+    
+    [RelayCommand]
+    private void ShowSettings()
+    {
+        ViewDialogService.ShowSettingsDialog();
+    }
+
+    #endregion
 }
